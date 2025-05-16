@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Função para ler e ajustar os dados
-def dataload(path,basefilename,nspectra=10):
+def dataloadop(path,basefilename,nspectra=10):
     sp = []
     for i in range(nspectra):
         data = np.loadtxt(path+"/"+basefilename+"_"+str(i)+"s.txt", delimiter='\t', dtype=str) # ler os espectros
@@ -12,12 +12,16 @@ def dataload(path,basefilename,nspectra=10):
     sp = np.array(sp).T # faz um array transposto com colunas sendo cada espectro
     return sp
 
+def dataloadorigintxt(path, file_name):
+    data = np.loadtxt(path+"/"+file_name, delimiter='\t', dtype=str) # ler os espectros
+    data = np.array([[float(x.replace(',','.')) for x in line] for line in data])
+    return data
+
 # TESTE (SEIKOUDA)
-path = "C:/Users/admin/Documents/Projeto/SESS150425"
-bnbranco = "B150425"
-bnspectra = "AR100425"
-tstep = 6
-inttime = 1.5
+path = "C:/Users/admin/Documents/Projeto/Soreteffect-Stokesshift/First-Run"
+file_name = "data-range-rb-fs.txt"
+data = dataloadorigintxt(path, file_name)
+print(np.shape(data))
 # wl, wn, adjspectra, ts, time_row, normspectra, peaks, peak_wavelengths = dataproc(path, bnbranco, bnspectra, tstep, inttime)
 
 
