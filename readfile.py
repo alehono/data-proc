@@ -5,11 +5,10 @@ def readata(filename, line=1, hline=0):
     bcount = []
     pcount = []
     try:
-        header = data[hline-1].split(' '+'\t') # tem que modificar para encontrar o ponto correto independente de onde ele começa no arquivo
-        header[2] = "moving average"
+        header = data[hline-1].split(' '+'\t') 
     except:
         header = []
-    for i in range(line-1,len(data)): # tem que modificar para encontrar o ponto correto independente de onde ele começa no arquivo
+    for i in range(line-1,len(data)): 
         line = data[i].split()
         bcount.append(float(line[0]))
         pcount.append(float(line[1]))

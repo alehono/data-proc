@@ -1,8 +1,6 @@
 import numpy as np
-from scipy.integrate import simpson as simps
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from readfile import readata
+from mpl_toolkits.mplot3d import Axes3
 
 # Função para ler e ajustar os dados
 def dataload(path,basefilename,nspectra=10):
@@ -14,76 +12,15 @@ def dataload(path,basefilename,nspectra=10):
     sp = np.array(sp).T # faz um array transposto com colunas sendo cada espectro
     return sp
 
-# Função de normalização relativa dos espectros a partir da área
-def normspec(spectra, wl, ref=1):
-    normspectra = np.zeros_like(spectra)
-    arearef = simps(spectra[:, ref], x=wl)
-    for i in range(spectra.shape[1]):
-        area = simps(spectra[:, i], x=wl)
-        normspectra[:, i] = spectra[:, i] * arearef / area
-    return normspectra
-
-# Função de processamento de dados
-def dataproc(p, b, s, tstep, inttime):
-    # ler os comprimentos de onda
-    data2 = np.loadtxt("C:/Users/admin/Documents/Projeto/Soreteffect-Stokesshift/08-23-2024/morning-tambiente/wavelength.txt", delimiter='\t', dtype=str)
-    data2 = np.array([data2[i].split() for i in range(len(data2))])
-    wl = np.array([float(x) for x in data2[:,0]])
-    wn = 1e7/wl
-    # ler os dados
-    branco = dataload(p, b, 10)    # ler o branco
-    spectra = dataload(p,s, 700) # ler os espectros
-    # faz média do branco
-    meanbranco = np.array([float(np.mean(coluna)) for coluna in branco])
-    # subtrai branco dos dados
-    adjspectra = spectra - np.array(meanbranco).reshape(-1,1)
-    # criar o header de tempo de medida dos espectros
-    ts = inttime + tstep # time step
-    time_row = np.arange(adjspectra.shape[1]) * ts / 60
-    # fazer normalização com a área da curva
-    normspectra = normspec(adjspectra, wl)
-    # encontrar os pontos de máximo para cada espectro
-    peaks = np.max(normspectra, axis=0) # Intensidade máxima de cada espectro
-    peak_wavelengths = wl[np.argmax(normspectra, axis=0)] # Comprimento de onda correspondente
-    return wl, wn, adjspectra, ts, time_row, normspectra, peaks, peak_wavelengths
-
 # TESTE (SEIKOUDA)
 path = "C:/Users/admin/Documents/Projeto/SESS150425"
 bnbranco = "B150425"
 bnspectra = "AR100425"
 tstep = 6
 inttime = 1.5
-wl, wn, adjspectra, ts, time_row, normspectra, peaks, peak_wavelengths = dataproc(path, bnbranco, bnspectra, tstep, inttime)
-
-# ESCOLHER QUATRO ESPECTROS (t = 5, 15, 25, 35 min):
-targt = np.array([5, 15, 25, 35]) # 0) Array com os tempos definidos como referência
-tind = np.abs(time_row - targt[:, None]).argmin(axis=1) # 1) tomar os índices desses tempos
-selected_times = time_row[tind] # 2) encontrar os valores de tempo mais próximos dos tempos desejados
-# 3) encontrar os espectros relacionados a esses índices
-selected_raw_spectra = adjspectra[:, tind]         # espectros não normalizados
-selected_norm_spectra = normspectra[:, tind]       # espectros normalizados
-
-# REALIZAR A ANÁLISE DOS DADOS DE ESPECTRO POR TEMPERATURA COM A NORMALIZAÇÃO PELA ÁREA
-# 0) criar o nome dos arquivos e um arquivo com as temperaturas
-temps = np.array([(20+i*5) for i in range(7)]) # temperaturas
-tsp = "C:/Users/admin/Documents/Projeto/Fluorescence-spectraxTemperature" # caminho do arquivo
-fbn = "RB090425-TV" # nome base dos arquivos
-cc = "CC.ifx" # designação final nos arquivos (C de gaus celcius e C de crescente - direção da variação de temperatura)
-# 1) ler os espectros e ajustá-los
-tempspectra = []
-for i in range(len(temps)):
-    filename = tsp + "/" + fbn + str(temps[i]) + cc
-    unus1, unus2, wls, tempspectru = readata(filename, 23)
-    tempspectra.append(tempspectru)
-wls = np.array(wls)
-tempspectra = np.array(tempspectra).T
-# 2) fazer a normalização dos espectros com o método das áreas
-nts = normspec(tempspectra, wls)
-# 3) utilizar todos os gráficos para fazer a diferença entre eles (T1 - T2, etc.) - tem que ser feito de forma a não criar duplicados (isso já está montado e é só transferir para cá)
+# wl, wn, adjspectra, ts, time_row, normspectra, peaks, peak_wavelengths = dataproc(path, bnbranco, bnspectra, tstep, inttime)
 
 
-# concatenar a linha de tempos de medida com os dados
-complete_data = np.vstack([time_row, adjspectra])
 
 # region Gráfico 3D com os espectros normalizados:
 # fig = plt.figure(figsize=(10, 6))
@@ -176,21 +113,21 @@ complete_data = np.vstack([time_row, adjspectra])
 
 # region Espectros dependência com a temperatura
 # Cria figura e subplots
-fig = plt.figure(figsize=(14, 6))
+# fig = plt.figure(figsize=(14, 6))
 
-# --- Gráfico: Espectros normalizados ---
-ax1 = fig.add_subplot(121)
-for i in range(len(temps)):
-    ax1.plot(wls, nts[:, i], label=f'{temps[i]:.0f} °C', lw=0.5)
+# # --- Gráfico: Espectros normalizados ---
+# ax1 = fig.add_subplot(121)
+# for i in range(len(temps)):
+#     ax1.plot(wls, nts[:, i], label=f'{temps[i]:.0f} °C', lw=0.5)
 
-ax1.set_xlabel('comprimento de onda (nm)')
-ax1.set_xlim([500,800])
-ax1.set_ylabel('Intensidade')
-ax1.set_ylim(0)
-ax1.set_title('Normalizado')
-ax1.legend(title='Temperatura')
+# ax1.set_xlabel('comprimento de onda (nm)')
+# ax1.set_xlim([500,800])
+# ax1.set_ylabel('Intensidade')
+# ax1.set_ylim(0)
+# ax1.set_title('Normalizado')
+# ax1.legend(title='Temperatura')
 
-ax2 = fig.add_subplot(122)
+# ax2 = fig.add_subplot(122)
 # for i in range(len(temps)):
 #     ax2.plot(wls, tempspectra[:, i], label=f'{temps[i]:.0f} °C', lw=0.5)
 
@@ -202,15 +139,15 @@ ax2 = fig.add_subplot(122)
 # ax2.legend(title='Temperatura')
 
 # --- Gráfico: diferença entre espectros ---
-ax2 = fig.add_subplot(122)
-ax2.plot(wls, nts[:, 0] - nts[:, len(temps)-1], label=f'20 - 50 °C', lw=0.5)
-ax2.set_xlabel('comprimento de onda (nm)')
-ax2.set_xlim([500,800])
-ax2.set_ylabel('Intensidade')
-ax2.set_title('Normalizado')
-ax2.legend(title='Temperatura')
+# ax2 = fig.add_subplot(122)
+# ax2.plot(wls, nts[:, 0] - nts[:, len(temps)-1], label=f'20 - 50 °C', lw=0.5)
+# ax2.set_xlabel('comprimento de onda (nm)')
+# ax2.set_xlim([500,800])
+# ax2.set_ylabel('Intensidade')
+# ax2.set_title('Normalizado')
+# ax2.legend(title='Temperatura')
+
+
+# plt.tight_layout()
+# plt.show()
 #endregion
-
-plt.tight_layout()
-plt.show()
-
