@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3
+from mpl_toolkits.mplot3d import Axes3D
 
 # Função para ler e ajustar os dados
 def dataload(path,basefilename,nspectra=10):

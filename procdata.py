@@ -62,24 +62,19 @@ def tempnorm(tsp, fbn, cc, ti, qt, step): # tsp: caminho dos arquivos; fbn: nome
     # 3) utilizar todos os gráficos para fazer a diferença entre eles (T1 - T2, etc.) - tem que ser feito de forma a não criar duplicados (isso já está montado e é só transferir para cá)
     return temps, wls, tempspectra, nts
 
-# concatenar a linha de tempos de medida com os dados
-def adjdata(x, y, z):
-    i = 0
-    while i == 0:
-        if z.shape[1] == len(x):
-            xz = np.vstack([x, z])
-            i = 1
-        elif z.shape[1] < len(x):
-            z = np.hstack([z, np.zeros(z.shape[0])])
-        else:
-            x.append([0])
-    while i == 1:
-        if xz.shape[0] == len(y):
-            xyz = np.vstack([y, xz])
-            i = 0
-        elif z.shape[0] < len(y):
-            z = np.vstack([z, np.zeros(z.shape[1])])
-        else:
-            y.append([0])
-
+# Concatenar a linha de tempos de medida com os dados
+def adjdata(x, y, z): # x header; y: wavelength; z: data matrix
+    x = x.reshape(1, -1)
+    y = y.reshape(-1, 1)
+    x = np.concatenate([[np.nan], x[0]])
+    print(np.shape(x))
+    yz = np.hstack([y, z])
+    xyz = np.vstack([x, yz])
     return xyz
+
+# TESTE:
+x = np.array(np.linspace(1, 5, 5))
+y = np.array(np.linspace(1, 10, 10))
+z = np.array(np.linspace(20, 100, 50)).reshape(10, 5)
+xyz = adjdata(x, y, z)
+print(xyz)
