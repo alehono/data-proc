@@ -50,7 +50,7 @@ def spectraselector(spectra, time_row, ti=0, ts=5, qt=5):
     selected_spectra = spectra[:, tind] # 3) encontrar os espectros relacionados a esses índices
     return selected_times, selected_spectra
     
-def tempheader(ti, qt, step):    
+def tempheader(step, qt, ti=20):    
     # 0) criar o nome dos arquivos e um arquivo com as temperaturas
     return np.array([(ti+step*i) for i in range(qt)]) # temperaturas
 
@@ -73,15 +73,26 @@ def adjdata(x, y, z): # x header; y: wavelength; z: data matrix
     x = x.reshape(1, -1)
     y = y.reshape(-1, 1)
     x = np.concatenate([[np.nan], x[0]])
-    print(np.shape(x))
     yz = np.hstack([y, z])
     xyz = np.vstack([x, yz])
     return xyz
+
+# Faz a diferença entre dois espectros na matriz, para todos os espectros
+def difspec(k, headername, spectramatrix):
+    header = headername[k] # header da referência
+    header2 = [] # Header desses gráficos que serão montados
+    difference = [] # matriz de diferêncas
+    for i in range(spectramatrix.shape[1]): # loop que faz subtração
+        if i != k:
+            difference.append(spectramatrix[:, k] - spectramatrix[:, i])
+            header2.append(str(header)+" - "+str(headername[i]))
+    return np.array(header2),np.array(difference)
 
 # TESTE:
 x = np.array(np.linspace(1, 5, 5))
 y = np.array(np.linspace(1, 10, 10))
 z = np.array(np.linspace(20, 100, 50)).reshape(10, 5)
+dhead, diff = difspec(0, x, z)
 xyz = adjdata(x, y, z)
 
 # TESTE:
@@ -90,11 +101,11 @@ file_name = "data-range-rb-fs.txt"
 wn_name = path+"/wavenumbers.txt"
 wn, wl = wavereader(wn_name)
 data = loadspectra.dataloadorigintxt(path, file_name)
-print(type(data))
 normspectra = normspec(data, wl)
-print(type(normspectra))
 temps = tempheader(20, 6, 10)
 
+
+"PASSAR TUDO QUE ESTÁ A PARTIR DAQUI PARA O OUTRO MÓDULO"
 # region Espectros dependência com a temperatura
 # Cria figura e subplots
 fig = plt.figure(figsize=(14, 6))
@@ -123,5 +134,3 @@ ax2.legend(title='Variação de temperatura')
 plt.tight_layout()
 plt.show()
 #endregion
-
-"FAZER DIFERENÇA"

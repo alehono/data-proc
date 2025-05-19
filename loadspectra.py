@@ -1,6 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # Função para ler e ajustar os dados
 def dataloadop(path,basefilename,nspectra=10):
@@ -17,15 +15,8 @@ def dataloadorigintxt(path, file_name):
     data = np.array([[float(x.replace(',','.')) for x in line] for line in data])
     return data
 
-# TESTE (SEIKOUDA)
-path = "C:/Users/admin/Documents/Projeto/Soreteffect-Stokesshift/First-Run"
-file_name = "data-range-rb-fs.txt"
-data = dataloadorigintxt(path, file_name)
-print(np.shape(data))
-# wl, wn, adjspectra, ts, time_row, normspectra, peaks, peak_wavelengths = dataproc(path, bnbranco, bnspectra, tstep, inttime)
 
-
-
+"PASSAR TUDO QUE ESTÁ A PARTIR DAQUI PARA O OUTRO MÓDULO"
 # region Gráfico 3D com os espectros normalizados:
 # fig = plt.figure(figsize=(10, 6))
 # ax = fig.add_subplot(111, projection='3d')
