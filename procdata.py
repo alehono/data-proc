@@ -66,7 +66,7 @@ def tempnorm(tsp, fbn, cc, temps): # tsp: caminho dos arquivos; fbn: nome base d
     # 2) fazer a normalização dos espectros com o método das áreas
     nts = normspec(tempspectra, wls)
     # 3) utilizar todos os gráficos para fazer a diferença entre eles (T1 - T2, etc.) - tem que ser feito de forma a não criar duplicados (isso já está montado e é só transferir para cá)
-    return temps, wls, tempspectra, nts
+    return wls, tempspectra, nts
 
 # Concatenar a linha de tempos de medida com os dados
 def adjdata(x, y, z): # x header; y: wavelength; z: data matrix
@@ -77,6 +77,12 @@ def adjdata(x, y, z): # x header; y: wavelength; z: data matrix
     xyz = np.vstack([x, yz])
     return xyz
 
+# Concatenar a linha de tempos de medida com os dados
+def adjdata2(y, z): # x header; y: wavelength; z: data matrix
+    y = y.reshape(-1, 1)
+    yz = np.hstack([y, z])
+    return yz
+
 # Faz a diferença entre dois espectros na matriz, para todos os espectros
 def difspec(k, headername, spectramatrix):
     header = headername[k] # header da referência
@@ -86,7 +92,7 @@ def difspec(k, headername, spectramatrix):
         if i != k:
             difference.append(spectramatrix[:, k] - spectramatrix[:, i])
             header2.append(str(header)+" - "+str(headername[i]))
-    return np.array(header2),np.array(difference)
+    return np.array(header2), np.array(difference).T
 
 # TESTE:
 x = np.array(np.linspace(1, 5, 5))
@@ -103,34 +109,3 @@ wn, wl = wavereader(wn_name)
 data = loadspectra.dataloadorigintxt(path, file_name)
 normspectra = normspec(data, wl)
 temps = tempheader(20, 6, 10)
-
-
-"PASSAR TUDO QUE ESTÁ A PARTIR DAQUI PARA O OUTRO MÓDULO"
-# region Espectros dependência com a temperatura
-# Cria figura e subplots
-fig = plt.figure(figsize=(14, 6))
-
-# --- Gráfico: Espectros normalizados ---
-ax1 = fig.add_subplot(121)
-for i in range(len(temps)):
-    ax1.plot(wl, normspectra[:, i], label=f'{temps[i]:.0f} °C', lw=0.5)
-
-ax1.set_xlabel('comprimento de onda (nm)')
-ax1.set_xlim([500,800])
-ax1.set_ylabel('Intensidade')
-ax1.set_ylim(0)
-ax1.set_title('Espectros')
-ax1.legend(title='Temperatura')
-
-ax2 = fig.add_subplot(122)
-ax2.plot(wl, normspectra[:, 0] - normspectra[:, 5], label=f'20 - 70 °C', lw=0.5)
-
-ax2.set_xlabel('comprimento de onda (nm)')
-ax2.set_xlim([500,800])
-ax2.set_ylabel('Intensidade')
-ax2.set_title('Diferença entre Espectros')
-ax2.legend(title='Variação de temperatura')
-
-plt.tight_layout()
-plt.show()
-#endregion
